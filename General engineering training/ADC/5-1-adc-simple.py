@@ -1,0 +1,40 @@
+import RPi.GPIO as GPIO
+import time
+
+
+def decimal2binary(val):
+    return [int(bit) for bit in bin(val)[2:].zfill(8)]
+
+
+def num2dac(val):
+    sign = decimal2binary(val)
+    GPIO.output(dac, sign)
+    return sign
+
+
+def adc():
+    for val in range(256):
+        signal = num2dac(val)
+        time.sleep(0.02)
+        voltage = val / 256 * 3.3
+        compVal = GPIO.input(comp)
+        if not compVal:
+            return (compVal, voltage)
+        time.sleep(0.07)
+    return
+
+
+dac = [10, 9, 11, 5, 6, 13, 19, 26]  # DAC
+comp = 4  # GPIO-pin correspondent to comparator
+troyka = 17  # GPIO-pin correspondent to TROYKA-MODULE
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(dac, GPIO.OUT)
+GPIO.setup(troyka, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(comp, GPIO.IN)
+
+try:
+    while True:
+        print(adc())
+finally:
+    GPIO.output(dac, 0)
+    GPIO.cleanup()
